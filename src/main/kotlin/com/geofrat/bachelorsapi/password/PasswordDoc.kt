@@ -9,6 +9,8 @@ data class PasswordDoc (
         @Id
         val id: ObjectId = ObjectId.get(),
         val passwordHash: String,
-        val appleId: String,
-        val description: String
+        val vendorName: String,
+        val userAccount: String,
+        val userId: String,
+        val groupId: String?
 )

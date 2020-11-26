@@ -10,27 +10,20 @@ class PasswordController (
         private val passwordService: PasswordService
 ) {
     @GetMapping("/passwords")
-    fun getMyAllPasswordHashes(@RequestParam(value="appleId", required = true ) appleId: String) : List<PasswordDoc> {
-        val passwordHashes = passwordService.getAllMyPasswords(appleId)
-        if (passwordHashes.isEmpty()) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No passwords saved yet")
-        }
-        return passwordHashes
+    fun getMyAllPasswordHashes(@RequestParam(value="userId", required = true ) userId: String) : ResponseEntity<List<PasswordDto>> {
+        val passwordHashes = passwordService.getAllMyPasswords(userId)
+        return ResponseEntity.ok(passwordHashes)
     }
 
     @PostMapping("/passwords")
-    fun createNewPassword(@RequestBody password: PasswordDto) : PasswordDoc {
-        try {
-            return passwordService.createNewPassword(password)
-        } catch (e: PasswordAlreadyExistsException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
-        }
+    fun createNewPassword(@RequestBody password: PasswordDto) : ResponseEntity<PasswordDto> {
+            return ResponseEntity.ok(passwordService.createNewPassword(password))
     }
 
     @PatchMapping("/passwords")
-    fun changePasswordHash(@RequestBody password: PasswordDto) : PasswordDoc {
+    fun changePasswordHash(@RequestBody password: PasswordDto) : ResponseEntity<PasswordDto> {
         try {
-            return passwordService.modifyPassword(password)
+            return ResponseEntity.ok(passwordService.modifyPassword(password))
         } catch (e: PasswordNotFoundException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
         }
@@ -44,6 +37,11 @@ class PasswordController (
         } catch (e: PasswordNotFoundException) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message)
         }
+    }
+
+    @GetMapping("/passwords/groups/{userId}")
+    fun getGroupPasswords(@PathVariable(required = true) userId: String): ResponseEntity<List<PasswordDto>> {
+        return ResponseEntity.ok(passwordService.getGroupPasswords(userId))
     }
 
 }
