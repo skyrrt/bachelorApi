@@ -13,7 +13,6 @@ class PasswordService (
         private val userService: UserService
 ) {
     fun getAllMyPasswords(userUid: String) : List<PasswordDto> {
-        println(userUid)
         val user = userService.findByUid(userUid)
         return passwordRepository.findAllByUserId(user.id.toHexString())
                 .map { PasswordDto(it.id.toHexString(), it.passwordHash, it.vendorName, it.userAccount, it.userId, it.groupId) }

@@ -27,7 +27,6 @@ class UserService (
     }
 
     fun findByUid(userUid: String): UserDoc {
-        println(userUid)
         return userRepository.findByUid(userUid)
     }
 
