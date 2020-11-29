@@ -5,6 +5,7 @@ import com.geofrat.bachelorsapi.membership.GroupMembershipRepository
 import com.geofrat.bachelorsapi.password.PasswordDoc
 import com.geofrat.bachelorsapi.password.PasswordRepository
 import com.geofrat.bachelorsapi.request.GroupRequestRepository
+import com.geofrat.bachelorsapi.user.UserDoc
 import com.geofrat.bachelorsapi.user.UserRepository
 import com.geofrat.bachelorsapi.user.UserService
 import org.bson.types.ObjectId
@@ -21,9 +22,10 @@ class GroupService (
     fun createNewGroup(groupDto: GroupDto): GroupDto{
         val groupDoc = GroupDoc(groupName = groupDto.groupName,
                                 createdBy = groupDto.createdBy)
+        val owner = userService.findByUid(groupDto.createdBy)
         val createdGroupDoc = groupRepository.save(groupDoc)
         val groupMembership = GroupMembership(groupId = createdGroupDoc.id,
-                userId = ObjectId(createdGroupDoc.createdBy))
+                userId = owner.id)
         groupMembershipRepository.save(groupMembership)
         return GroupDto(createdGroupDoc.groupName, createdGroupDoc.createdBy)
     }
@@ -44,10 +46,15 @@ class GroupService (
         val groupMemberships = groupMembershipRepository.findAllByUserId(owner.id)
         return groupMemberships.map {
             val group = groupRepository.findById(it.groupId).get()
-            val groupMembers = groupMembershipRepository.findAllByGroupId(it.groupId).map { it.userId }
-            val users = userService.getUsersByUids(groupMembers).filter { !it.id.equals(group.id) }
-            GroupDetails(group.id.toHexString(), group.groupName, group.createdBy, users)
+            GroupDetails(group.id.toHexString(), group.groupName, group.createdBy)
         }
+    }
+
+    fun getGroupMembers(groupId: String, userUid: String): List<UserDoc> {
+        val owner = userService.findByUid(userUid)
+        val groupMembers = groupMembershipRepository.findAllByGroupId(ObjectId(groupId)).map { it.userId }
+        val users = userService.getUsersByUids(groupMembers).filter { !it.id.equals(owner.id) }
+        return users
     }
 
     fun leaveGroup(userUid: String, groupId: String) {

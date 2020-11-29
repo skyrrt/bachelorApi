@@ -1,5 +1,6 @@
 package com.geofrat.bachelorsapi.group
 
+import com.geofrat.bachelorsapi.user.UserDoc
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -21,6 +22,11 @@ class GroupController (
     fun leaveGroup(@RequestParam(value = "groupId") groupId: String, @RequestParam(value = "userUid") userUid: String): ResponseEntity<Any> {
         groupService.leaveGroup(userUid, groupId)
         return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/groups/users")
+    fun getGroupMembers(@RequestParam(value = "groupId") groupId: String, @RequestParam(value = "userUid") userUid: String): ResponseEntity<List<UserDoc>> {
+        return ResponseEntity.ok(groupService.getGroupMembers(groupId,userUid))
     }
 
 }
