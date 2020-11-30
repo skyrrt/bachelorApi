@@ -15,8 +15,8 @@ class UserService (
         private val groupMembershipRepository: GroupMembershipRepository,
         private val groupRequestRepository: GroupRequestRepository
 ) {
-    fun getUsersByUids(uids: List<ObjectId>) : List<UserDoc> {
-        return userRepository.findAllByUidIn(uids)
+    fun getUsersByIds(uids: List<ObjectId>) : List<UserDoc> {
+        return userRepository.findAllByIdIn(uids)
     }
 
     fun saveNewUser(user: UserDto): UserDto {

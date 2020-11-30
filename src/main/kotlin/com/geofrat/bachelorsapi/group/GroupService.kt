@@ -5,9 +5,7 @@ import com.geofrat.bachelorsapi.membership.GroupMembershipRepository
 import com.geofrat.bachelorsapi.password.PasswordDoc
 import com.geofrat.bachelorsapi.password.PasswordRepository
 import com.geofrat.bachelorsapi.request.GroupRequestRepository
-import com.geofrat.bachelorsapi.user.UserDoc
-import com.geofrat.bachelorsapi.user.UserRepository
-import com.geofrat.bachelorsapi.user.UserService
+import com.geofrat.bachelorsapi.user.*
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Service
 
@@ -50,11 +48,11 @@ class GroupService (
         }
     }
 
-    fun getGroupMembers(groupId: String, userUid: String): List<UserDoc> {
+    fun getGroupMembers(groupId: String, userUid: String): List<UserDetails> {
         val owner = userService.findByUid(userUid)
         val groupMembers = groupMembershipRepository.findAllByGroupId(ObjectId(groupId)).map { it.userId }
-        val users = userService.getUsersByUids(groupMembers).filter { !it.id.equals(owner.id) }
-        return users
+        val users = userService.getUsersByIds(groupMembers).filter { !it.id.equals(owner.id) }
+        return users.map { UserDetails(it.id.toHexString(), it.email, it.uid) }
     }
 
     fun leaveGroup(userUid: String, groupId: String) {
@@ -74,11 +72,16 @@ class GroupService (
 
     fun getOwnedGroups(userUid: String): List<ObjectId> {
         val owner = userService.findByUid(userUid)
-        return groupRepository.findAllByCreatedBy(owner.id.toHexString()).map { it.id }
+        return groupRepository.findAllByCreatedBy(owner.uid).map { it.id }
     }
 
     fun findById(groupId: ObjectId): GroupDoc {
         return groupRepository.findById(groupId).get()
+    }
+
+    fun deleteUserFromGroup(groupId: String, userId: String) {
+        val groupMembership = groupMembershipRepository.findByGroupIdAndUserId(ObjectId(groupId), ObjectId(userId))
+        groupMembershipRepository.delete(groupMembership)
     }
 
 }

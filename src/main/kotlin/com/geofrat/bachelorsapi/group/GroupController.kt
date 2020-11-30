@@ -1,5 +1,6 @@
 package com.geofrat.bachelorsapi.group
 
+import com.geofrat.bachelorsapi.user.UserDetails
 import com.geofrat.bachelorsapi.user.UserDoc
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -25,8 +26,15 @@ class GroupController (
     }
 
     @GetMapping("/groups/users")
-    fun getGroupMembers(@RequestParam(value = "groupId") groupId: String, @RequestParam(value = "userUid") userUid: String): ResponseEntity<List<UserDoc>> {
+    fun getGroupMembers(@RequestParam(value = "groupId") groupId: String, @RequestParam(value = "userUid") userUid: String): ResponseEntity<List<UserDetails>> {
         return ResponseEntity.ok(groupService.getGroupMembers(groupId,userUid))
     }
+
+    @DeleteMapping("/groups/users")
+    fun deleteUserFromGroup(@RequestParam(value = "groupId") groupId: String, @RequestParam(value = "userId") userId: String): ResponseEntity<Any> {
+        groupService.deleteUserFromGroup(groupId, userId)
+        return ResponseEntity.ok().build()
+    }
+
 
 }
