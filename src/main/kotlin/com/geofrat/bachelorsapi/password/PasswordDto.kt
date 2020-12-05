@@ -6,5 +6,6 @@ data class PasswordDto (
         val vendorName: String,
         val userAccount: String,
         val userId: String,
-        val groupId: String?
+        val groupId: String?,
+        val groupName: String?
 )

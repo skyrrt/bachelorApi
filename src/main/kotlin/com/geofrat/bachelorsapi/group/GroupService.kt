@@ -31,7 +31,7 @@ class GroupService (
     fun deleteGroup(groupId: String, userUid: String) {
         groupMembershipRepository.deleteAllByGroupId(ObjectId(groupId))
         groupRequestRepository.deleteAllByGroupId(ObjectId(groupId))
-        val passwords = passwordRepository.findAllByGroupId(ObjectId(groupId))
+        val passwords = passwordRepository.findAllByGroupId(groupId)
         val newList = passwords.map {
             PasswordDoc(it.id, it.passwordHash, it.vendorName, it.userAccount, it.userId, null)
         }
@@ -59,15 +59,13 @@ class GroupService (
         val owner = userService.findByUid(userUid)
         val group = groupRepository.findById(ObjectId(groupId))
         if (group.isPresent) {
-            val groupDoc = group.get()
-            if (groupDoc.createdBy.equals(owner.id.toHexString())) {
-                deleteGroup(groupId, userUid)
-            }
-        } else {
             val groupMembership = groupMembershipRepository.findByGroupIdAndUserId(ObjectId(groupId), owner.id)
             groupMembershipRepository.deleteById(groupMembership.id)
+            val groupDoc = group.get()
+            if (groupDoc.createdBy.equals(owner.uid)) {
+                deleteGroup(groupId, userUid)
+            }
         }
-
     }
 
     fun getOwnedGroups(userUid: String): List<ObjectId> {

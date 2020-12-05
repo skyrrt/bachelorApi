@@ -36,10 +36,11 @@ class UserService (
 
     fun deleteUser(userUid: String) {
         val user = userRepository.findByUid(userUid)
+        val groupIdsToDelete = groupRepository.findAllByCreatedBy(userUid).map { it.id }
         passwordRepository.deleteAllByUserId(user.id.toHexString())
-        groupRepository.deleteAllByCreatedBy(user.id.toHexString())
+        groupRepository.deleteAllByCreatedBy(userUid)
         groupRequestRepository.deleteAllByUserId(user.id)
-        groupMembershipRepository.deleteAllByUserId(user.id)
+        groupMembershipRepository.deleteAllByGroupIdIn(groupIdsToDelete)
         userRepository.delete(user)
     }
 }
